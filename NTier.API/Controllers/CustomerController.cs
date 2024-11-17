@@ -71,6 +71,91 @@ namespace NTier.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetCustomersChunk")]
+        public IActionResult GetCustomersChunk()
+        {
+            // Bazen tüm tablonun belleğe bir kere yüklenmesini önlemek için verileri parçalar halinde almak isteyebilirsiniz, bunun için bu Chunkyöntemi kullanabilirsiniz.
+            // Bu, binlerce kaydın bulunduğu durumlarda kullanışlıdır.
+            var result = _customerService.ExecQueryWithoutGet(new Query("SalesLT.CustomerNew"));
+            var customers = new List<IEnumerable<dynamic>>();
+            result.Chunk(10, (index, page) =>
+            {
+                if (page == 3)
+                {
+                    return false;
+                }
+                customers.Add(index);
+                return true;
+            });
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersPaginate")]
+        public IActionResult GetCustomersPaginate()
+        {
+            // Bu yöntem, sayfalama işlemi yapmak için kullanılır.
+            var result = _customerService.ExecQueryWithoutGet(new Query("SalesLT.CustomerNew"));
+            var customers = result.Paginate(1,25);
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersStoredProcedure")]
+        public IActionResult GetCustomersStoredProcedures()
+        {
+            var result = _customerService.Sql("EXEC SelectAllCustomers");
+            return Ok(result);
+        }
+
+        [HttpGet("GetCustomersOrderBy")]
+        public IActionResult GetCustomersOrderBy()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").OrderByDesc("FirstName"));
+            return Ok(customers);
+        }
+
+
+        [HttpGet("GetCustomersWhereBetween")]
+        public IActionResult GetCustomersWhereBetween()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereBetween("CustomerID", 1, 10));
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersWhereIn")]
+        public IActionResult GetCustomersWhereIn()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereIn("CustomerID", new[] { 1, 2, 3 }));
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersWhereNotIn")]
+        public IActionResult GetCustomersWhereNotIn()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereNotIn("CustomerID", new[] { 1, 2, 3 }));
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersWhereNull")]
+        public IActionResult GetCustomersWhereNull()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereNull("MiddleName"));
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersWhereNotNull")]
+        public IActionResult GetCustomersWhereNotNull()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereNotNull("MiddleName"));
+            return Ok(customers);
+        }
+
+        [HttpGet("GetCustomersWhereDate")]
+        public IActionResult GetCustomersWhereDate()
+        {
+            var customers = _customerService.ExecQuery(new Query("SalesLT.CustomerNew").WhereDate("ModifiedDate", "2021-01-01"));
+            return Ok(customers);
+        }
+
         [HttpPost("AddCustomer")]
         public IActionResult AddCustomer([FromBody] CustomerAddModel model)
         {

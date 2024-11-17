@@ -19,6 +19,11 @@ namespace NTier.Business.Concrete
             return _tDal.ExecQuery(query);
         }
 
+        public Query ExecQueryWithoutGet(Query query)
+        {
+            return _tDal.ExecQueryWithoutGet(query);
+        }
+
         public XQuery XQuery()
         {
             return _tDal.XQuery();

@@ -7,8 +7,8 @@ namespace NTier.Business.Abstract
     public interface ICustomerService<T> where T : class, IEntity, new()
     {
         IEnumerable<dynamic> ExecQuery(Query query);
+        Query ExecQueryWithoutGet(Query query);
         XQuery XQuery();
-
         IEnumerable<dynamic> Sql(string sql, dynamic? parameters = null);
 
         IEnumerable<dynamic> Add(Query query, T entity);
