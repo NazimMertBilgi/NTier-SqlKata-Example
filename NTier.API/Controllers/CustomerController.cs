@@ -11,12 +11,10 @@ namespace NTier.API.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly XQuery _xQuery;
-        private readonly ICustomerService<Customer> _customerService;
-        public CustomerController(ICustomerService<Customer> customerService, XQuery xQuery)
+        private readonly ICustomerService _customerService;
+        public CustomerController(ICustomerService customerService, XQuery xQuery)
         {
             _customerService = customerService;
-            _xQuery = xQuery;
         }
 
         [HttpGet("GetAllCustomers")]

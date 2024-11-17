@@ -1,6 +1,5 @@
 ﻿
 using NTier.Business.Abstract;
-using NTier.Core.Entities;
 using NTier.DataAccess.Abstract;
 using NTier.Entities.Concrete;
 using SqlKata;
@@ -8,8 +7,7 @@ using SqlKata.Execution;
 
 namespace NTier.Business.Concrete
 {
-    public class CustomerManager<TEntity, TDal>(TDal tDal) : ICustomerService<TEntity>
-        where TEntity : Customer, IEntity, new()
+    public class CustomerManager<TDal>(TDal tDal) : ICustomerService
         where TDal : ICustomerDal
     {
         private readonly TDal _tDal = tDal;
@@ -34,12 +32,12 @@ namespace NTier.Business.Concrete
             return _tDal.Sql(sql, parameters);
         }
 
-        public IEnumerable<dynamic> Add(Query query, TEntity entity)
+        public IEnumerable<dynamic> Add(Query query, Customer entity)
         {
             return _tDal.Add(query, entity);
         }
 
-        public IEnumerable<dynamic> Update(Query query, TEntity entity)
+        public IEnumerable<dynamic> Update(Query query, Customer entity)
         {
             return _tDal.Update(query, entity);
         }
