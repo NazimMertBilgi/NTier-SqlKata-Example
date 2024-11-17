@@ -1,0 +1,24 @@
+{
+  "name": "NTier-SqlKata",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "change-package-name": "node changePackageName.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NazimMertBilgi/NTier-SqlKata-Example.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NazimMertBilgi/NTier-SqlKata-Example/issues"
+  },
+  "homepage": "https://github.com/NazimMertBilgi/NTier-SqlKata-Example#readme",
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "promptly": "^3.2.0",
+    "replace": "^1.2.2"
+  }
+}

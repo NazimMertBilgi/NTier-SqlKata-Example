@@ -1,0 +1,5 @@
+{
+    "packageName": "NTier",
+    "slnFileName": "NTier-SqlKata.sln",
+    "folders": ["Core", "DataAccess", "Entities", "Business", "API"]
+}

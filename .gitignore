@@ -5,6 +5,8 @@
 *.userosscache
 *.sln.docstates
 
+node_modules/
+
 # User-specific files (Mono auto generated)
 mono_crash.*
 
