@@ -1,11 +1,16 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Data.SqlClient;
-using NTier.Business.Abstract;
-using NTier.Business.Concrete;
-using NTier.DataAccess.Abstract;
-using NTier.DataAccess.Concrete.SqlKata;
-using NTier.Entities.Concrete;
+using Microsoft.IdentityModel.Tokens;
+using NTier.Core.Classes.AppSettings;
+using NTier.Business.Abstract; // if you haven't run npm run generate yet, put this part in the comment line. ( eðer henüz npm run generate iþlemi gerçekleþtirmediysen bu kýsmý yorum satýrýna al. )
+using NTier.Business.Concrete; // if you haven't run npm run generate yet, put this part in the comment line. ( eðer henüz npm run generate iþlemi gerçekleþtirmediysen bu kýsmý yorum satýrýna al. )
+using NTier.DataAccess.Abstract; // if you haven't run npm run generate yet, put this part in the comment line. ( eðer henüz npm run generate iþlemi gerçekleþtirmediysen bu kýsmý yorum satýrýna al. )
+using NTier.DataAccess.Concrete.SqlKata; // if you haven't run npm run generate yet, put this part in the comment line. ( eðer henüz npm run generate iþlemi gerçekleþtirmediysen bu kýsmý yorum satýrýna al. )
+using NTier.Entities.Concrete; // if you haven't run npm run generate yet, put this part in the comment line. ( eðer henüz npm run generate iþlemi gerçekleþtirmediysen bu kýsmý yorum satýrýna al. )
 using SqlKata.Compilers;
 using SqlKata.Execution;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,11 +26,60 @@ builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttri
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-{
-    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-}));
 //
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueCountLimit = int.MaxValue;
+});
+//
+var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+builder.Services.Configure<AppSettings>(appSettingsSection);
+var appSettings = appSettingsSection.Get<AppSettings>();
+var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+builder.Services.AddAuthentication(scheme =>
+{
+    scheme.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    scheme.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = ctx =>
+        {
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = ctx =>
+        {
+            ctx.NoResult();
+            ctx.Response.StatusCode = 500;
+            ctx.Response.ContentType = "text/plain";
+            ctx.Response.WriteAsync(ctx.Exception.ToString()).Wait();
+            return Task.CompletedTask;
+        },
+        OnChallenge = ctx =>
+        {
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = ctx =>
+        {
+            return Task.CompletedTask;
+        }
+    };
+});
+//
+
 builder.Services.AddTransient<QueryFactory>((e) =>
 {
     var connection = new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -56,6 +110,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

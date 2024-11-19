@@ -1,6 +1,6 @@
 {
     "packageName": "NTier",
-    "slnFileName": "NTier-SqlKata.sln",
+    "slnFileName": "NTier.sln",
     "folders": [
         "Core",
         "DataAccess",
@@ -9,8 +9,8 @@
         "API"
     ],
     "dbConnection": {
-        "server": "DESKTOP-VKRMLIU",
-        "database": "TestDB",
+        "server": ".",
+        "database": "BoytekErpDB",
         "driver": "msnodesqlv8",
         "options": {
             "trustedConnection": true
