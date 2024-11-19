@@ -1,6 +1,6 @@
 {
     "packageName": "NTier",
-    "slnFileName": "NTier.sln",
+    "slnFileName": "NTier-SqlKata.sln",
     "folders": [
         "Core",
         "DataAccess",
