@@ -327,7 +327,7 @@ namespace ${this.packageName}.API.Controllers
 
 
             const addModelFilePath = path.join(tableModelsPath, `${className}AddModel.cs`);
-            if (!fs.exists(addModelFilePath)) {
+            if (!fs.existsSync(addModelFilePath)) {
                 let addModelContent = `using System;\nusing System.Collections.Generic;\nusing System.ComponentModel.DataAnnotations;\nusing System.Linq;\nusing System.Text;\nusing System.Threading.Tasks;\n\nnamespace ${this.packageName}.Core.Models.${className}\n{\n    public class ${className}AddModel\n    {\n`;
                 columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE, IS_PRIMARY_KEY }) => {
                     if (!IS_PRIMARY_KEY) {
