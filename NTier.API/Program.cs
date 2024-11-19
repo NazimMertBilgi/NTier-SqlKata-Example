@@ -41,10 +41,6 @@ builder.Services.AddTransient<XQuery>((e) =>
 //
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-//
-builder.Services.AddScoped<ICustomerDal, SKCustomerDal>();
-builder.Services.AddScoped<ICustomerService, CustomerManager<ICustomerDal>>();
-//
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
