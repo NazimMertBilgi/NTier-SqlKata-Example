@@ -18,6 +18,8 @@
   "homepage": "https://github.com/NazimMertBilgi/NTier-SqlKata-Example#readme",
   "dependencies": {
     "fs-extra": "^11.2.0",
+    "msnodesqlv8": "^4.2.1",
+    "mssql": "^11.0.1",
     "promptly": "^3.2.0",
     "replace": "^1.2.2"
   }

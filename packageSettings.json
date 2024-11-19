@@ -1,5 +1,19 @@
 {
     "packageName": "NTier",
     "slnFileName": "NTier-SqlKata.sln",
-    "folders": ["Core", "DataAccess", "Entities", "Business", "API"]
+    "folders": [
+        "Core",
+        "DataAccess",
+        "Entities",
+        "Business",
+        "API"
+    ],
+    "dbConnection": {
+        "server": "DESKTOP-VKRMLIU",
+        "database": "TestDB",
+        "driver": "msnodesqlv8",
+        "options": {
+            "trustedConnection": true
+        }
+    }
 }
