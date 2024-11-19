@@ -242,23 +242,6 @@ namespace ${this.packageName}.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetAllChunk")]
-        public IActionResult GetAllChunk()
-        {
-            var result = _${className.toLowerCase()}Service.ExecQueryWithoutGet(new Query("${className}"));
-            var ${className.toLowerCase()}s = new List<IEnumerable<${className}>>();
-            result.Chunk(10, (index, page) =>
-            {
-                if (page == 3)
-                {
-                    return false;
-                }
-                ${className.toLowerCase()}s.Add(index);
-                return true;
-            });
-            return Ok(${className.toLowerCase()}s);
-        }
-
         [HttpGet("GetAllPaginate")]
         public IActionResult GetAllPaginate()
         {
