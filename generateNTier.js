@@ -59,7 +59,7 @@ class NMBDatabaseSchemaGenerator {
             const className = tableName;
             const filePath = path.join(entitiesPath, `${className}.cs`);
 
-            let classContent = `using ${this.packageName}.Core.Entities;\nusing SqlKata.ModelHelper;\nusing System.Xml.Linq;\n\nnamespace ${this.packageName}.Entities.Concrete\n{\n    [Table("${tableName}")]\n    public class ${className}\n    {\n`;
+            let classContent = `using ${this.packageName}.Core.Entities;\nusing SqlKata.ModelHelper;\nusing System.Xml.Linq;\n\nnamespace ${this.packageName}.Entities.Concrete\n{\n    [Table("${tableName}")]\n    public class ${className} : IEntity\n    {\n`;
             columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE, IS_PRIMARY_KEY }, index) => {
                 let csharpType;
                 switch (DATA_TYPE) {
@@ -68,6 +68,7 @@ class NMBDatabaseSchemaGenerator {
                         break;
                     case 'varchar':
                     case 'nvarchar':
+                    case 'char':
                         csharpType = IS_NULLABLE === 'YES' ? 'string?' : 'string';
                         break;
                     case 'bit':
@@ -326,7 +327,7 @@ namespace ${this.packageName}.API.Controllers
 
 
             const addModelFilePath = path.join(tableModelsPath, `${className}AddModel.cs`);
-            if (!fs.existsSync(addModelFilePath)) {
+            if (!fs.exists(addModelFilePath)) {
                 let addModelContent = `using System;\nusing System.Collections.Generic;\nusing System.ComponentModel.DataAnnotations;\nusing System.Linq;\nusing System.Text;\nusing System.Threading.Tasks;\n\nnamespace ${this.packageName}.Core.Models.${className}\n{\n    public class ${className}AddModel\n    {\n`;
                 columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE, IS_PRIMARY_KEY }) => {
                     if (!IS_PRIMARY_KEY) {
@@ -337,6 +338,7 @@ namespace ${this.packageName}.API.Controllers
                                 break;
                             case 'varchar':
                             case 'nvarchar':
+                            case 'char':
                                 csharpType = IS_NULLABLE === 'YES' ? 'string?' : 'string';
                                 break;
                             case 'bit':
@@ -368,6 +370,7 @@ namespace ${this.packageName}.API.Controllers
                             break;
                         case 'varchar':
                         case 'nvarchar':
+                        case 'char':
                             csharpType = IS_NULLABLE === 'YES' ? 'string?' : 'string';
                             break;
                         case 'bit':
