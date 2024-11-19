@@ -22,6 +22,9 @@ This project aims to generate a multi-tier architecture using SqlKata for dynami
     ```
 
 3. Configure the `packageSettings.json` file:
+
+   
+   <b>!IMPORTANT! Do not change the packageName and slnFileName values, this is handled by changePackageName.js.</b>
     ```json
     {
       "dbConnection": {
