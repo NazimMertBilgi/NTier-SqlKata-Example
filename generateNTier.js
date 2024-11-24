@@ -59,12 +59,27 @@ class NMBDatabaseSchemaGenerator {
             const className = tableName;
             const filePath = path.join(entitiesPath, `${className}.cs`);
 
-            let classContent = `using ${this.packageName}.Core.Entities;\nusing SqlKata.ModelHelper;\nusing System.Xml.Linq;\n\nnamespace ${this.packageName}.Entities.Concrete\n{\n    [Table("${tableName}")]\n    public class ${className} : IEntity\n    {\n`;
+            let classContent = `using ${this.packageName}.Core.Entities;
+using SqlKata.ModelHelper;
+using System.Xml.Linq;
+
+namespace ${this.packageName}.Entities.Concrete
+{
+    [Table("${tableName}")]
+    public class ${className} : IEntity
+    {
+`;
             columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE, IS_PRIMARY_KEY }, index) => {
                 let csharpType;
                 switch (DATA_TYPE) {
                     case 'int':
                         csharpType = IS_NULLABLE === 'YES' ? 'int?' : 'int';
+                        break;
+                    case 'tinyint':
+                        csharpType = IS_NULLABLE === 'YES' ? 'byte?' : 'byte';
+                        break;
+                    case 'decimal':
+                        csharpType = IS_NULLABLE === 'YES' ? 'decimal?' : 'decimal';
                         break;
                     case 'varchar':
                     case 'nvarchar':
@@ -77,17 +92,26 @@ class NMBDatabaseSchemaGenerator {
                     case 'datetime':
                         csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
                         break;
+                    case 'smalldatetime':
+                        csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                        break;
+                    case 'date':
+                        csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                        break;
                     default:
-                        csharpType = 'object';
+                        csharpType = IS_NULLABLE === 'YES' ? 'object?' : 'object';
                 }
                 let stringNullableFeature = csharpType == "string" ? "= null!;" : "";
                 let primaryKeyAttribute = IS_PRIMARY_KEY ? '[PrimaryKey]\n        ' : '';
-                classContent += `        ${primaryKeyAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}\n`;
+                classContent += `        ${primaryKeyAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}
+`;
                 if (IS_PRIMARY_KEY && index < columns.length - 1) {
                     classContent += '\n';
                 }
             });
-            classContent += '    }\n}\n';
+            classContent += `    }
+}
+`;
 
             fs.writeFileSync(filePath, classContent, 'utf8');
         }
@@ -104,7 +128,17 @@ class NMBDatabaseSchemaGenerator {
             const filePath = path.join(dalPath, `I${className}Dal.cs`);
             if (fs.existsSync(filePath)) continue;
 
-            const dalContent = `using ${this.packageName}.Core.DataAccess;\nusing ${this.packageName}.Entities.Concrete;\n\nnamespace ${this.packageName}.DataAccess.Abstract\n{\n    public interface I${className}Dal : IEntityRepository<${className}>\n    {\n        // Custom Operations\n    }\n}\n`;
+            const dalContent = `using ${this.packageName}.Core.DataAccess;
+using ${this.packageName}.Entities.Concrete;
+
+namespace ${this.packageName}.DataAccess.Abstract
+{
+    public interface I${className}Dal : IEntityRepository<${className}>
+    {
+        // Custom Operations
+    }
+}
+`;
             fs.writeFileSync(filePath, dalContent, 'utf8');
         }
     }
@@ -120,7 +154,23 @@ class NMBDatabaseSchemaGenerator {
             const filePath = path.join(dalPath, `SK${className}Dal.cs`);
             if (fs.existsSync(filePath)) continue;
 
-            const dalContent = `using ${this.packageName}.Core.DataAccess;\nusing ${this.packageName}.Core.DataAccess.SqlKata;\nusing ${this.packageName}.DataAccess.Abstract;\nusing ${this.packageName}.Entities.Concrete;\nusing SqlKata.Execution;\nusing System.Data;\n\nnamespace ${this.packageName}.DataAccess.Concrete.SqlKata\n{\n    public class SK${className}Dal : SKEntityRepositoryBase<${className}>, I${className}Dal\n    {\n        public SK${className}Dal(QueryFactory dbConnection, XQuery dbConnectionXQuery) : base(dbConnection, dbConnectionXQuery)\n        {\n        }\n    }\n}\n`;
+            const dalContent = `using ${this.packageName}.Core.DataAccess;
+using ${this.packageName}.Core.DataAccess.SqlKata;
+using ${this.packageName}.DataAccess.Abstract;
+using ${this.packageName}.Entities.Concrete;
+using SqlKata.Execution;
+using System.Data;
+
+namespace ${this.packageName}.DataAccess.Concrete.SqlKata
+{
+    public class SK${className}Dal : SKEntityRepositoryBase<${className}>, I${className}Dal
+    {
+        public SK${className}Dal(QueryFactory dbConnection, XQuery dbConnectionXQuery) : base(dbConnection, dbConnectionXQuery)
+        {
+        }
+    }
+}
+`;
             fs.writeFileSync(filePath, dalContent, 'utf8');
         }
     }
@@ -136,7 +186,32 @@ class NMBDatabaseSchemaGenerator {
             const filePath = path.join(servicePath, `I${className}Service.cs`);
             if (fs.existsSync(filePath)) continue;
 
-            const serviceContent = `using ${this.packageName}.Entities.Concrete;\nusing SqlKata;\nusing SqlKata.Execution;\n\nnamespace ${this.packageName}.Business.Abstract\n{\n    public interface I${className}Service\n    {\n        IEnumerable<dynamic> ExecQuery(Query query);\n\n        Query ExecQueryWithoutGet(Query query);\n\n        XQuery XQuery();\n        \n        IEnumerable<dynamic> Sql(string sql, dynamic? parameters = null);\n\n        IEnumerable<dynamic> Add(Query query, ${className} entity);\n\n        IEnumerable<dynamic> Update(Query query, ${className} entity);\n\n        IEnumerable<dynamic> Delete(Query query);\n    }\n}\n`;
+            const serviceContent = `using ${this.packageName}.Entities.Concrete;
+using SqlKata;
+using SqlKata.Execution;
+
+namespace ${this.packageName}.Business.Abstract
+{
+    public interface I${className}Service
+    {
+        IEnumerable<dynamic> ExecQuery(Query query);
+
+        Task<IEnumerable<dynamic>> ExecQueryAsync(Query query);
+
+        Query ExecQueryWithoutGet(Query query);
+
+        XQuery XQuery();
+        
+        IEnumerable<dynamic> Sql(string sql, dynamic? parameters = null);
+
+        IEnumerable<dynamic> Add(Query query, ${className} entity);
+
+        IEnumerable<dynamic> Update(Query query, ${className} entity);
+
+        IEnumerable<dynamic> Delete(Query query);
+    }
+}
+`;
             fs.writeFileSync(filePath, serviceContent, 'utf8');
         }
     }
@@ -152,7 +227,66 @@ class NMBDatabaseSchemaGenerator {
             const filePath = path.join(managerPath, `${className}Manager.cs`);
             if (fs.existsSync(filePath)) continue;
 
-            const managerContent = `using ${this.packageName}.Business.Abstract;\nusing ${this.packageName}.DataAccess.Abstract;\nusing ${this.packageName}.Entities.Concrete;\nusing SqlKata;\nusing SqlKata.Execution;\n\nnamespace ${this.packageName}.Business.Concrete\n{\n    public class ${className}Manager<TDal> : I${className}Service\n        where TDal : I${className}Dal\n    {\n        private readonly TDal _tDal;\n\n        public ${className}Manager(TDal tDal)\n        {\n            _tDal = tDal;\n        }\n\n        public IEnumerable<dynamic> ExecQuery(Query query)\n        {\n            return _tDal.ExecQuery(query);\n        }\n\n        public Query ExecQueryWithoutGet(Query query)\n        {\n            return _tDal.ExecQueryWithoutGet(query);\n        }\n\n        public XQuery XQuery()\n        {\n            return _tDal.XQuery();\n        }\n\n        public IEnumerable<dynamic> Sql(string sql, dynamic? parameters = null)\n        {\n            return _tDal.Sql(sql, parameters);\n        }\n\n        public IEnumerable<dynamic> Add(Query query, ${className} entity)\n        {\n            return _tDal.Add(query, entity);\n        }\n\n        public IEnumerable<dynamic> Update(Query query, ${className} entity)\n        {\n            return _tDal.Update(query, entity);\n        }\n\n        public IEnumerable<dynamic> Delete(Query query)\n        {\n            return _tDal.Delete(query);\n        }\n    }\n}\n`;
+            const managerContent = `using ${this.packageName}.Business.Abstract;
+using ${this.packageName}.DataAccess.Abstract;
+using ${this.packageName}.Entities.Concrete;
+using SqlKata;
+using SqlKata.Execution;
+
+namespace ${this.packageName}.Business.Concrete
+{
+    public class ${className}Manager<TDal> : I${className}Service
+        where TDal : I${className}Dal
+    {
+        private readonly TDal _tDal;
+
+        public ${className}Manager(TDal tDal)
+        {
+            _tDal = tDal;
+        }
+
+        public IEnumerable<dynamic> ExecQuery(Query query)
+        {
+            return _tDal.ExecQuery(query);
+        }
+
+         public async Task<IEnumerable<dynamic>> ExecQueryAsync(Query query)
+        {
+            return await _tDal.ExecQueryAsync(query);
+        }
+
+        public Query ExecQueryWithoutGet(Query query)
+        {
+            return _tDal.ExecQueryWithoutGet(query);
+        }
+
+        public XQuery XQuery()
+        {
+            return _tDal.XQuery();
+        }
+
+        public IEnumerable<dynamic> Sql(string sql, dynamic? parameters = null)
+        {
+            return _tDal.Sql(sql, parameters);
+        }
+
+        public IEnumerable<dynamic> Add(Query query, ${className} entity)
+        {
+            return _tDal.Add(query, entity);
+        }
+
+        public IEnumerable<dynamic> Update(Query query, ${className} entity)
+        {
+            return _tDal.Update(query, entity);
+        }
+
+        public IEnumerable<dynamic> Delete(Query query)
+        {
+            return _tDal.Delete(query);
+        }
+    }
+}
+`;
             fs.writeFileSync(filePath, managerContent, 'utf8');
         }
     }
@@ -235,6 +369,13 @@ namespace ${this.packageName}.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetAll_Async")]
+        public async Task<IActionResult> GetAll_Async()
+        {
+            var result = await _${className.toLowerCase()}Service.ExecQueryAsync(new SqlKata.Query("${className}"));
+            return Ok(result);
+        }
+
         [HttpGet("Get/{id}")]
         public IActionResult Get(int id)
         {
@@ -311,13 +452,30 @@ namespace ${this.packageName}.API.Controllers
 
             const addModelFilePath = path.join(tableModelsPath, `${className}AddModel.cs`);
             if (!fs.existsSync(addModelFilePath)) {
-                let addModelContent = `using System;\nusing System.Collections.Generic;\nusing System.ComponentModel.DataAnnotations;\nusing System.Linq;\nusing System.Text;\nusing System.Threading.Tasks;\n\nnamespace ${this.packageName}.Core.Models.${className}\n{\n    public class ${className}AddModel\n    {\n`;
+                let addModelContent = `using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ${this.packageName}.Core.Models.${className}
+{
+    public class ${className}AddModel
+    {
+`;
                 columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE, IS_PRIMARY_KEY }) => {
                     if (!IS_PRIMARY_KEY) {
                         let csharpType;
                         switch (DATA_TYPE) {
                             case 'int':
                                 csharpType = IS_NULLABLE === 'YES' ? 'int?' : 'int';
+                                break;
+                            case 'tinyint':
+                                csharpType = IS_NULLABLE === 'YES' ? 'byte?' : 'byte';
+                                break;
+                            case 'decimal':
+                                csharpType = IS_NULLABLE === 'YES' ? 'decimal?' : 'decimal';
                                 break;
                             case 'varchar':
                             case 'nvarchar':
@@ -330,26 +488,53 @@ namespace ${this.packageName}.API.Controllers
                             case 'datetime':
                                 csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
                                 break;
+                            case 'smalldatetime':
+                                csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                                break;
+                            case 'date':
+                                csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                                break;
                             default:
-                                csharpType = 'object';
+                                csharpType = IS_NULLABLE === 'YES' ? 'object?' : 'object';
                         }
                         let stringNullableFeature = csharpType === "string" && IS_NULLABLE === 'NO' ? "= null!;" : "";
                         let requiredAttribute = IS_NULLABLE === 'NO' ? `[Required(ErrorMessage = "Lütfen ${COLUMN_NAME} alanını doldurunuz.")]\n        ` : '';
-                        addModelContent += `        ${requiredAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}\n\n`;
+                        addModelContent += `        ${requiredAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}
+
+`;
                     }
                 });
-                addModelContent += '    }\n}\n';
+                addModelContent += `    }
+}
+`;
                 fs.writeFileSync(addModelFilePath, addModelContent, 'utf8');
             }
 
             const updateModelFilePath = path.join(tableModelsPath, `${className}UpdateModel.cs`);
             if (!fs.existsSync(updateModelFilePath)) {
-                let updateModelContent = `using System;\nusing System.Collections.Generic;\nusing System.ComponentModel.DataAnnotations;\nusing System.Linq;\nusing System.Text;\nusing System.Threading.Tasks;\n\nnamespace ${this.packageName}.Core.Models.${className}\n{\n    public class ${className}UpdateModel\n    {\n`;
+                let updateModelContent = `using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ${this.packageName}.Core.Models.${className}
+{
+    public class ${className}UpdateModel
+    {
+`;
                 columns.forEach(({ COLUMN_NAME, DATA_TYPE, IS_NULLABLE }) => {
                     let csharpType;
                     switch (DATA_TYPE) {
                         case 'int':
                             csharpType = IS_NULLABLE === 'YES' ? 'int?' : 'int';
+                            break;
+                        case 'tinyint':
+                            csharpType = IS_NULLABLE === 'YES' ? 'byte?' : 'byte';
+                            break;
+                        case 'decimal':
+                            csharpType = IS_NULLABLE === 'YES' ? 'decimal?' : 'decimal';
                             break;
                         case 'varchar':
                         case 'nvarchar':
@@ -362,14 +547,24 @@ namespace ${this.packageName}.API.Controllers
                         case 'datetime':
                             csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
                             break;
+                        case 'smalldatetime':
+                            csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                            break;
+                        case 'date':
+                            csharpType = IS_NULLABLE === 'YES' ? 'DateTime?' : 'DateTime';
+                            break;
                         default:
-                            csharpType = 'object';
+                            csharpType = IS_NULLABLE === 'YES' ? 'object?' : 'object';
                     }
                     let stringNullableFeature = csharpType === "string" && IS_NULLABLE === 'NO' ? "= null!;" : "";
                     let requiredAttribute = IS_NULLABLE === 'NO' ? `[Required(ErrorMessage = "Lütfen ${COLUMN_NAME} alanını doldurunuz.")]\n        ` : '';
-                    updateModelContent += `        ${requiredAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}\n\n`;
+                    updateModelContent += `        ${requiredAttribute}public ${csharpType} ${COLUMN_NAME} { get; set; } ${stringNullableFeature}
+
+`;
                 });
-                updateModelContent += '    }\n}\n';
+                updateModelContent += `    }
+}
+`;
                 fs.writeFileSync(updateModelFilePath, updateModelContent, 'utf8');
             }
         }

@@ -27,6 +27,11 @@ namespace NTier.Core.DataAccess.SqlKata
             return _db.FromQuery(query).Get();
         }
 
+        public async Task<IEnumerable<dynamic>> ExecQueryAsync(Query query)
+        {
+            return await _db.FromQuery(query).GetAsync();
+        }
+
         public Query ExecQueryWithoutGet(Query query)
         {
             return _db.FromQuery(query);
