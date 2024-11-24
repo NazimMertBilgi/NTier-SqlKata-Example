@@ -18,7 +18,7 @@ namespace NTier.Core.DataAccess
 
         IEnumerable<dynamic> Add(Query query, T entity);
 
-        IEnumerable<dynamic> Update(Query query, T entity);
+        IEnumerable<dynamic> Update(Query query, object entity);
 
         IEnumerable<dynamic> Delete(Query query);
 

@@ -42,14 +42,14 @@ namespace NTier.Core.DataAccess.SqlKata
             return _dbXQuery;
         }
 
-        public IEnumerable<dynamic> Update(Query query, TEntity entity)
-        {
-            return _db.FromQuery(query).AsUpdate(entity).Get();
-        }
-
         public IEnumerable<dynamic> Add(Query query, TEntity entity)
         {
             return _db.FromQuery(query).AsInsert(entity).Get();
+        }
+
+         public IEnumerable<dynamic> Update(Query query, object entity)
+        {
+            return _db.FromQuery(query).AsUpdate(entity).Get();
         }
 
         public IEnumerable<dynamic> Delete(Query query)
